@@ -3,7 +3,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.3520
   (Quelldatei „main.cpp“ wird kompiliert)
       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18):
       der Vorlageninstanziierungskontext (der älteste zuerst) ist
-          C:\Users\Admin\VS Box\ServerCheck\main.cpp(46,20):
+          C:\Users\Admin\VS Box\ServerCheck\main.cpp(62,29):
           Siehe Verweis auf die gerade kompilierte Instanziierung "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)" der Funktions-Vorlage.
           with
           [
@@ -11,7 +11,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.3520
               _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
               _Alloc=std::allocator<char>
           ]
-              C:\Users\Admin\VS Box\ServerCheck\main.cpp(46,20):
+              C:\Users\Admin\VS Box\ServerCheck\main.cpp(62,29):
               Ersten Verweis auf "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string" in "updateWebseite" anzeigen
           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(812,17):
           Siehe Verweis auf die gerade kompilierte Instanziierung "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" der Funktions-Vorlage.
@@ -32,43 +32,10 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.3520
               _SizeTy=unsigned __int64
           ]
   
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18): warning C4244: "=": Konvertierung von "wchar_t" in "char", möglicher Datenverlust
-  (Quelldatei „main.cpp“ wird kompiliert)
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18):
-      der Vorlageninstanziierungskontext (der älteste zuerst) ist
-          C:\Users\Admin\VS Box\ServerCheck\main.cpp(64,27):
-          Siehe Verweis auf die gerade kompilierte Instanziierung "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)" der Funktions-Vorlage.
-          with
-          [
-              _Elem=wchar_t,
-              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
-              _Alloc=std::allocator<char>
-          ]
-              C:\Users\Admin\VS Box\ServerCheck\main.cpp(64,27):
-              Ersten Verweis auf "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string" in "sendeDiscordNachricht" anzeigen
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(812,17):
-          Siehe Verweis auf die gerade kompilierte Instanziierung "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" der Funktions-Vorlage.
-          with
-          [
-              _Size_type=unsigned __int64,
-              _Iter=wchar_t *,
-              _Sent=wchar_t *,
-              _Size=unsigned __int64
-          ]
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(968,18):
-          Siehe Verweis auf die gerade kompilierte Instanziierung "_OutIt *std::_Copy_n_unchecked4<wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)" der Funktions-Vorlage.
-          with
-          [
-              _OutIt=char *,
-              _Size=unsigned __int64,
-              _InIt=wchar_t *,
-              _SizeTy=unsigned __int64
-          ]
-  
   Code wird generiert.
-  124 of 850 functions (14.6%) were compiled, the rest were copied from previous compilation.
-    49 functions were new in current compilation
-    56 functions had inline decision re-evaluated but remain unchanged
+  126 of 866 functions (14.5%) were compiled, the rest were copied from previous compilation.
+    102 functions were new in current compilation
+    148 functions had inline decision re-evaluated but remain unchanged
   Codegenerierung ist abgeschlossen.
   ServerCheck.vcxproj -> C:\Users\Admin\VS Box\ServerCheck\x64\Release\ServerCheck.exe
   Der Befehl "pwsh.exe" ist entweder falsch geschrieben oder
