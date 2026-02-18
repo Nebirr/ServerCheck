@@ -9,30 +9,44 @@
 #include <ctime>
 
 struct ServerInfo {
-    std::wstring exeName;
+    std::wstring displayName; 
+    std::wstring exeName;     
     std::wstring batPfad;
-    std::wstring logPfad; 
+    std::wstring logPfad;
+    std::wstring logSuche;
     std::chrono::steady_clock::time_point letzterAlarm;
 };
 
-std::wstring holeJoinCode(std::wstring logPfad) {
-    if (logPfad == L"NONE" || logPfad.empty()) return L"";
+
+std::string wstringToUtf8(const std::wstring& wstr) {
+    if (wstr.empty()) return std::string();
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+    std::string strTo(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+    return strTo;
+}
+
+std::wstring extrahiereLogWert(std::wstring logPfad, std::wstring sucheW) {
+    if (logPfad == L"NONE" || sucheW == L"NONE" || logPfad.empty()) return L"";
+
+    std::string suche = wstringToUtf8(sucheW);
 
     std::ifstream file(logPfad);
     std::string line;
-    std::string letzterCode = "";
+    std::string gefundenesResultat = "";
 
     if (file.is_open()) {
         while (std::getline(file, line)) {
-            size_t pos = line.find("join code ");
+            size_t pos = line.find(suche);
             if (pos != std::string::npos) {
-                letzterCode = line.substr(pos + 10);
-                letzterCode.erase(letzterCode.find_last_not_of(" \n\r\t") + 1);
+                gefundenesResultat = line.substr(pos + suche.length());
+
+                gefundenesResultat.erase(gefundenesResultat.find_last_not_of(" \n\r\t") + 1);
             }
         }
         file.close();
     }
-    return std::wstring(letzterCode.begin(), letzterCode.end());
+    return std::wstring(gefundenesResultat.begin(), gefundenesResultat.end());
 }
 
 bool istProzessAktiv(std::wstring prozessName) {
@@ -66,14 +80,6 @@ void updateWebseite(const std::vector<ServerInfo>& liste) {
         jsonFile << "}";
         jsonFile.close();
     }
-}
-
-std::string wstringToUtf8(const std::wstring& wstr) {
-    if (wstr.empty()) return std::string();
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
-    std::string strTo(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
-    return strTo;
 }
 
 void sendeDiscordNachricht(std::wstring serverName, const std::string& webhookURL, bool istAbsturz, std::wstring zusatzInfo = L"") {
@@ -124,17 +130,21 @@ int main() {
 
     std::wifstream configFile(configName);
     if (configFile.is_open()) {
-        std::wstring tempExe, tempPfad, tempLog;
+        std::wstring tempDisplayName, tempExe, tempPfad, tempLog, tempSuche;
 
-        while (std::getline(configFile, tempExe) &&
+        while (std::getline(configFile, tempDisplayName) &&
+            std::getline(configFile, tempExe) &&
             std::getline(configFile, tempPfad) &&
-            std::getline(configFile, tempLog)) {
+            std::getline(configFile, tempLog) &&
+            std::getline(configFile, tempSuche)) {
 
             if (!tempExe.empty()) {
                 serverListe.push_back({
+                    tempDisplayName, 
                     tempExe,
                     tempPfad,
                     tempLog,
+                    tempSuche,       
                     std::chrono::steady_clock::now() - std::chrono::minutes(11)
                     });
             }
@@ -148,12 +158,12 @@ int main() {
         if (istProzessAktiv(server.exeName)) {
             std::wstring info = L"WatchGuard aktiv.";
 
-            std::wstring code = holeJoinCode(server.logPfad);
+            std::wstring code = extrahiereLogWert(server.logPfad, server.logSuche);
             if (!code.empty()) {
-                info = L"Online. Join-Code: " + code;
+                info = L"Online. " + server.logSuche + L": " + code;
             }
 
-            sendeDiscordNachricht(server.exeName, webhookURL, false, info);
+            sendeDiscordNachricht(server.displayName, webhookURL, false, info);
         }
     }
 
@@ -164,30 +174,32 @@ int main() {
         updateWebseite(serverListe);
         for (auto& server : serverListe) {
             if (!istProzessAktiv(server.exeName)) {
-                sendeDiscordNachricht(server.exeName, webhookURL, true);
+                sendeDiscordNachricht(server.displayName, webhookURL, true);
 
                 auto startZeit = std::chrono::steady_clock::now();
 
                 std::string restartCmd = "start \"\" \"" + wstringToUtf8(server.batPfad) + "\"";
                 system(restartCmd.c_str());
 
-                std::wcout << L"\n[RESTART] " << server.exeName << L" wird hochgefahren..." << std::endl;
+                std::wcout << L"\n[RESTART] " << server.displayName << L" wird hochgefahren..." << std::endl;
 
                 std::wstring code = L"";
                 if (server.logPfad != L"NONE") {
-                    int maxVersuche = 20; 
+                    int maxVersuche = 20;
                     int aktuellerVersuch = 0;
 
                     while (code.empty() && aktuellerVersuch < maxVersuche) {
+                        if (!istProzessAktiv(server.exeName)) {
+                            std::wcout << L"[WARNUNG] Server ist während des Ladens abgestürzt!" << std::endl;
+                            break; 
+                        }
+
                         Sleep(20000); 
-                        code = holeJoinCode(server.logPfad);
+                        code = extrahiereLogWert(server.logPfad, server.logSuche);
 
                         aktuellerVersuch++;
-                        std::wcout << L"Warte auf Join-Code... (Versuch " << aktuellerVersuch << L")" << std::endl;
+                        std::wcout << L"Scan #" << aktuellerVersuch << L"..." << std::endl;
                     }
-                }
-                else {
-                    Sleep(30000); 
                 }
 
                 auto endZeit = std::chrono::steady_clock::now();
@@ -197,10 +209,10 @@ int main() {
                 std::wstring zusatzInfo = dauerInfo;
 
                 if (!code.empty()) {
-                    zusatzInfo = L"Join-Code: " + code + L" (" + dauerInfo + L")";
+                    zusatzInfo = server.logSuche + L": " + code + L" (" + dauerInfo + L")";
                 }
 
-                sendeDiscordNachricht(server.exeName, webhookURL, false, zusatzInfo);
+                sendeDiscordNachricht(server.displayName, webhookURL, false, zusatzInfo);
 
                 server.letzterAlarm = std::chrono::steady_clock::now();
             }
