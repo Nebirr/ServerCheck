@@ -75,6 +75,6 @@ UTF-8/UTF-16 Conversion: Clean handling of Windows special characters for web se
 ---
 
 ## 📄 License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/Nebirr/ServerCheck/blob/main/LICENSE) file for more details.
 
 ---
