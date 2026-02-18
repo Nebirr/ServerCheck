@@ -21,6 +21,8 @@
 Create a file named `webhook.txt` in the program's root directory and paste your Discord Webhook URL into it:
 ```text
 [https://discord.com/api/webhooks/your_id/your_token](https://discord.com/api/webhooks/your_id/your_token)
+```
+---
 
 ### 2. Configure Servers
 Create a config.txt in the root directory. Each monitored server requires a block of exactly 5 lines:
@@ -38,7 +40,7 @@ Create a config.txt in the root directory. Each monitored server requires a bloc
 ---
 
 ## 📝 Example ## config.txt
-
+```text
 Valheim Modded
 valheim_server.exe
 C:\Servers\Valheim\start.bat
@@ -54,7 +56,7 @@ node.exe
 C:\Scripts\start_web.bat
 NONE
 NONE
-
+```
 ---
 
 ## 🛠️ Technical Focus
