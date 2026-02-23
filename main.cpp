@@ -140,11 +140,11 @@ int main() {
 
             if (!tempExe.empty()) {
                 serverListe.push_back({
-                    tempDisplayName, 
+                    tempDisplayName,
                     tempExe,
                     tempPfad,
                     tempLog,
-                    tempSuche,       
+                    tempSuche,
                     std::chrono::steady_clock::now() - std::chrono::minutes(11)
                     });
             }
@@ -170,62 +170,91 @@ int main() {
     std::wcout << L"\nBeobachtung startet jetzt im Intervall..." << std::endl;
     Sleep(2000);
 
-while (true) {
-    updateWebseite(serverListe);
+    while (true) {
 
-    for (auto& server : serverListe) {
-        
-        if (!istProzessAktiv(server.exeName)) {
-            
-            
-            std::wcout << L"[CHECK] " << server.displayName << L" scheint offline. Prüfe erneut..." << std::endl;
-            Sleep(3000); 
-            
-            if (istProzessAktiv(server.exeName)) {
-                std::wcout << L"[INFO] Fehlalarm abgefangen. " << server.displayName << L" ist stabil." << std::endl;
-                continue; 
-            }
-            
+        updateWebseite(serverListe);
 
-            
-            sendeDiscordNachricht(server.displayName, webhookURL, true);
+        for (auto& server : serverListe) {
 
-            auto startZeit = std::chrono::steady_clock::now();
-            std::string restartCmd = "start \"\" \"" + wstringToUtf8(server.batPfad) + "\"";
-            system(restartCmd.c_str());
+            if (!istProzessAktiv(server.exeName)) {
 
-            std::wcout << L"\n[RESTART] " << server.displayName << L" wird neu gestartet..." << std::endl;
+                std::wcout << L"[CHECK] " << server.displayName << L" scheint offline. Prüfe erneut..." << std::endl;
+                Sleep(3000);
 
-            std::wstring code = L"";
-            if (server.logPfad != L"NONE") {
-                int maxVersuche = 15; 
-                int aktuellerVersuch = 0;
-
-                while (code.empty() && aktuellerVersuch < maxVersuche) {
-                    Sleep(15000); 
-                    
-                    code = extrahiereLogWert(server.logPfad, server.logSuche);
-
-                    aktuellerVersuch++;
-                    std::wcout << L"Scan für " << server.displayName << L" #" << aktuellerVersuch << L"..." << std::endl;
+                if (istProzessAktiv(server.exeName)) {
+                    std::wcout << L"[INFO] Fehlalarm abgefangen. " << server.displayName << L" ist stabil." << std::endl;
+                    continue;
                 }
+
+
+                sendeDiscordNachricht(server.displayName, webhookURL, true);
+
+
+                auto startZeit = std::chrono::steady_clock::now();
+                std::string restartCmd = "start \"\" \"" + wstringToUtf8(server.batPfad) + "\"";
+                system(restartCmd.c_str());
+
+                std::wcout << L"\n[RESTART] " << server.displayName << L" wird neu gestartet..." << std::endl;
+
+
+                std::wstring code = L"";
+                if (server.logPfad != L"NONE") {
+                    int maxVersuche = 15;
+                    int aktuellerVersuch = 0;
+
+                    while (code.empty() && aktuellerVersuch < maxVersuche) {
+                        Sleep(15000);
+
+
+                        std::wstring temp = extrahiereLogWert(server.logPfad, server.logSuche);
+
+
+                        if (!temp.empty() && temp.length() >= 5) {
+                            code = temp;
+                        }
+
+                        aktuellerVersuch++;
+                        std::wcout << L"Scan für " << server.displayName << L" #" << aktuellerVersuch << L"..." << std::endl;
+                    }
+
+
+                    if (code.empty()) {
+                        std::wcout << L"[INFO] Bisher kein Code gefunden. Starte finale 20s Wartezeit für " << server.displayName << L"..." << std::endl;
+                        Sleep(20000);
+
+                        code = extrahiereLogWert(server.logPfad, server.logSuche);
+
+                        if (!code.empty()) {
+                            std::wcout << L"[SUCCESS] Code im letzten Anlauf gefunden!" << std::endl;
+                        }
+                    }
+                }
+
+
+                auto endZeit = std::chrono::steady_clock::now();
+                auto dauerSekunden = std::chrono::duration_cast<std::chrono::seconds>(endZeit - startZeit).count();
+
+                std::wstring zusatzInfo;
+                if (!code.empty()) {
+
+                    zusatzInfo = server.logSuche + L": " + code + L" (Dauer: " + std::to_wstring(dauerSekunden) + L"s)";
+                }
+                else {
+
+                    zusatzInfo = L"Server online (Kein neuer " + server.logSuche + L" gefunden) (Dauer: " + std::to_wstring(dauerSekunden) + L"s)";
+                }
+
+
+                sendeDiscordNachricht(server.displayName, webhookURL, false, zusatzInfo);
+
+
+                server.letzterAlarm = std::chrono::steady_clock::now();
             }
-
-            auto endZeit = std::chrono::steady_clock::now();
-            auto dauerSekunden = std::chrono::duration_cast<std::chrono::seconds>(endZeit - startZeit).count();
-
-            std::wstring zusatzInfo = L"Dauer: " + std::to_wstring(dauerSekunden) + L"s";
-            if (!code.empty()) {
-                zusatzInfo = server.logSuche + L": " + code + L" (" + zusatzInfo + L")";
-            } else {
-                zusatzInfo = L"Server online (Kein neuer " + server.logSuche + L" gefunden)";
-            }
-
-            sendeDiscordNachricht(server.displayName, webhookURL, false, zusatzInfo);
-            server.letzterAlarm = std::chrono::steady_clock::now();
         }
+
+        Sleep(10000);
+
     }
-    Sleep(10000); 
-}
+
     return 0;
 }
