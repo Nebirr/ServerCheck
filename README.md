@@ -78,3 +78,12 @@ UTF-8/UTF-16 Conversion: Clean handling of Windows special characters for web se
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/Nebirr/ServerCheck/blob/main/LICENSE) file for more details.
 
 ---
+
+# ⚠️ PROJECT ARCHIVED / LEGACY
+This project is no longer actively maintained. 
+It has been succeeded by **[ServerWatchGuard](https://github.com/Nebirr/ServerWatchGuard?tab=readme-ov-file)**.
+
+**Why the change?**
+ServerChecker was a simple console-based tool. The new **ServerWatchGuard** runs as a native Windows Service, providing much higher stability, background operation, and professional logging.
+
+Please head over to the new repository for the latest updates and releases.
